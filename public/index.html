@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fee Management - Login</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="auth-box">
+    <h2 style="margin-bottom: 0.5rem; text-align: center;">Fee Management</h2>
+    <p style="color: var(--muted); text-align: center; margin-bottom: 1.5rem; font-size: 0.9rem;">Sign in to access dashboard</p>
+
+    <div id="alertBox" class="alert alert-err hidden"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label for="email">Email Address</label>
+        <input type="email" id="email" required autocomplete="username" placeholder="admin@feestructure.local">
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <button type="submit" class="btn" style="width: 100%; margin-top: 0.5rem;">Sign In</button>
+    </form>
+  </div>
+
+  <script type="module">
+    import { api, setCsrfToken } from './js/api.js';
+
+    const alertBox = document.getElementById('alertBox');
+    const form = document.getElementById('loginForm');
+
+    function showAlert(msg) {
+      alertBox.textContent = msg;
+      alertBox.classList.remove('hidden');
+    }
+
+    // Initialize session & CSRF token
+    api('api/auth.php').then(res => {
+      if (res.ok && res.data) {
+        if (res.data.csrf_token) setCsrfToken(res.data.csrf_token);
+        if (res.data.logged_in) window.location.href = 'app.html';
+      }
+    });
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      alertBox.classList.add('hidden');
+      const email = document.getElementById('email').value.trim();
+      const password = document.getElementById('password').value;
+
+      const res = await api('api/auth.php?action=login', 'POST', { email, password });
+      if (res.ok) {
+        if (res.data?.csrf_token) setCsrfToken(res.data.csrf_token);
+        window.location.href = 'app.html';
+      } else {
+        showAlert(res.error || 'Failed to sign in');
+      }
+    });
+  </script>
+</body>
+</html>

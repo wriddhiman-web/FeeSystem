@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fee Management Dashboard</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Header -->
+  <header class="app-header no-print">
+    <div>
+      <h2 style="font-size: 1.25rem;">Fee Management System</h2>
+      <small id="userBadge" style="color: var(--muted);"></small>
+    </div>
+    <button id="logoutBtn" class="btn btn-outline btn-sm">Sign Out</button>
+  </header>
+
+  <!-- Global Notification Alert -->
+  <div id="globalAlert" class="alert hidden no-print"></div>
+
+  <!-- Navigation -->
+  <nav class="nav-tabs no-print">
+    <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+    <button class="tab-btn" data-tab="students">Students</button>
+    <button class="tab-btn" data-tab="fees">Fees</button>
+    <button class="tab-btn" data-tab="payments">Payments</button>
+  </nav>
+
+  <!-- Section: Dashboard -->
+  <section id="tab-dashboard" class="tab-content no-print">
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div style="color: var(--muted); font-size: 0.85rem;">Total Students</div>
+        <div id="statStudents" class="stat-val">0</div>
+      </div>
+      <div class="stat-card">
+        <div style="color: var(--muted); font-size: 0.85rem;">Total Billed</div>
+        <div id="statBilled" class="stat-val">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div style="color: var(--muted); font-size: 0.85rem;">Total Collected</div>
+        <div id="statCollected" class="stat-val" style="color: var(--success);">$0.00</div>
+      </div>
+      <div class="stat-card">
+        <div style="color: var(--muted); font-size: 0.85rem;">Total Outstanding</div>
+        <div id="statOutstanding" class="stat-val" style="color: var(--danger);">$0.00</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin-bottom: 0.75rem;">Recent Payments</h3>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt #</th>
+              <th>Student</th>
+              <th>Fee Title</th>
+              <th>Amount</th>
+              <th>Method</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+          <tbody id="recentPaymentsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Students -->
+  <section id="tab-students" class="tab-content hidden no-print">
+    <div class="card">
+      <div class="actions-bar">
+        <input type="text" id="studentSearch" placeholder="Search by name, student code, course..." style="min-width: 280px;">
+        <button id="openAddStudentBtn" class="btn">+ Add Student</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Course</th>
+              <th>Total Billed</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="studentsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Fees -->
+  <section id="tab-fees" class="tab-content hidden no-print">
+    <div class="card">
+      <div class="actions-bar">
+        <select id="feeStudentFilter">
+          <option value="">All Students</option>
+        </select>
+        <button id="openAddFeeBtn" class="btn">+ Create Fee</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Student</th>
+              <th>Title</th>
+              <th>Due Date</th>
+              <th>Amount</th>
+              <th>Paid</th>
+              <th>Balance</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="feesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Section: Payments -->
+  <section id="tab-payments" class="tab-content hidden no-print">
+    <div class="card">
+      <div class="actions-bar">
+        <h3 style="font-size: 1.1rem;">Transaction History</h3>
+        <button id="openRecordPaymentBtn" class="btn">+ Record Payment</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr>
+              <th>Receipt #</th>
+              <th>Student</th>
+              <th>Fee Item</th>
+              <th>Amount Paid</th>
+              <th>Method</th>
+              <th>Date</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="paymentsTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal: Add Student -->
+  <div id="modalAddStudent" class="modal-backdrop hidden no-print">
+    <div class="modal">
+      <h3 style="margin-bottom: 1rem;">Add New Student</h3>
+      <form id="formAddStudent">
+        <div class="form-group">
+          <label for="stuCode">Student Code / Roll #</label>
+          <input type="text" id="stuCode" required placeholder="e.g. STU-2026-004">
+        </div>
+        <div class="form-group">
+          <label for="stuName">Full Name</label>
+          <input type="text" id="stuName" required placeholder="Student Name">
+        </div>
+        <div class="form-group">
+          <label for="stuEmail">Email Address</label>
+          <input type="email" id="stuEmail" required placeholder="student@example.com">
+        </div>
+        <div class="form-group">
+          <label for="stuPhone">Phone</label>
+          <input type="text" id="stuPhone" required placeholder="Phone Number">
+        </div>
+        <div class="form-group">
+          <label for="stuCourse">Course / Program</label>
+          <input type="text" id="stuCourse" required placeholder="e.g. Computer Science">
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline closeModalBtn">Cancel</button>
+          <button type="submit" class="btn">Save Student</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Add Fee -->
+  <div id="modalAddFee" class="modal-backdrop hidden no-print">
+    <div class="modal">
+      <h3 style="margin-bottom: 1rem;">Assign New Fee</h3>
+      <form id="formAddFee">
+        <div class="form-group">
+          <label for="feeStudentSelect">Select Student</label>
+          <select id="feeStudentSelect" required></select>
+        </div>
+        <div class="form-group">
+          <label for="feeTitle">Fee Title / Description</label>
+          <input type="text" id="feeTitle" required placeholder="e.g. Tuition Fee - Spring 2027">
+        </div>
+        <div class="form-group">
+          <label for="feeAmount">Amount ($)</label>
+          <input type="number" id="feeAmount" required step="0.01" min="1" placeholder="1000.00">
+        </div>
+        <div class="form-group">
+          <label for="feeDueDate">Due Date</label>
+          <input type="date" id="feeDueDate" required>
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline closeModalBtn">Cancel</button>
+          <button type="submit" class="btn">Assign Fee</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Record Payment -->
+  <div id="modalRecordPayment" class="modal-backdrop hidden no-print">
+    <div class="modal">
+      <h3 style="margin-bottom: 1rem;">Record Payment</h3>
+      <form id="formRecordPayment">
+        <div class="form-group">
+          <label for="payStudentSelect">Student</label>
+          <select id="payStudentSelect" required>
+            <option value="">-- Choose Student --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="payFeeSelect">Fee Obligation</label>
+          <select id="payFeeSelect" required>
+            <option value="">-- Select Student First --</option>
+          </select>
+        </div>
+        <div id="feeBalanceNotice" class="alert alert-ok hidden" style="font-size: 0.85rem;"></div>
+        <div class="form-group">
+          <label for="payAmount">Payment Amount ($)</label>
+          <input type="number" id="payAmount" required step="0.01" min="0.01" placeholder="0.00">
+        </div>
+        <div class="form-group">
+          <label for="payMethod">Payment Method</label>
+          <select id="payMethod">
+            <option value="Cash">Cash</option>
+            <option value="Credit/Debit Card">Credit/Debit Card</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Online">Online</option>
+            <option value="Cheque">Cheque</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="payNotes">Notes (Optional)</label>
+          <input type="text" id="payNotes" placeholder="Reference, check #, etc.">
+        </div>
+        <div style="display:flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+          <button type="button" class="btn btn-outline closeModalBtn">Cancel</button>
+          <button type="submit" class="btn">Submit Payment</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Modal: Student Ledger / Details -->
+  <div id="modalLedger" class="modal-backdrop hidden no-print">
+    <div class="modal" style="max-width: 650px;">
+      <h3 id="ledgerStudentTitle" style="margin-bottom: 0.5rem;">Student Ledger</h3>
+      <p id="ledgerStudentMeta" style="color: var(--muted); font-size: 0.9rem; margin-bottom: 1rem;"></p>
+      
+      <h4 style="margin: 0.75rem 0 0.25rem;">Assigned Fees</h4>
+      <div style="overflow-x: auto; margin-bottom: 1rem;">
+        <table>
+          <thead>
+            <tr><th>Title</th><th>Due Date</th><th>Total</th><th>Paid</th><th>Balance</th></tr>
+          </thead>
+          <tbody id="ledgerFeesBody"></tbody>
+        </table>
+      </div>
+
+      <h4 style="margin: 0.75rem 0 0.25rem;">Payment History</h4>
+      <div style="overflow-x: auto;">
+        <table>
+          <thead>
+            <tr><th>Receipt #</th><th>Fee</th><th>Amount</th><th>Method</th><th>Date</th></tr>
+          </thead>
+          <tbody id="ledgerPaymentsBody"></tbody>
+        </table>
+      </div>
+
+      <div style="display:flex; justify-content: flex-end; margin-top: 1.5rem;">
+        <button type="button" class="btn btn-outline closeModalBtn">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Printable Receipt Modal / View -->
+  <div id="modalReceipt" class="modal-backdrop hidden">
+    <div class="modal printable" style="max-width: 550px;">
+      <div class="receipt-box">
+        <div class="receipt-header">
+          <h2 style="font-size: 1.4rem; letter-spacing: 0.05em;">ACME ACADEMY</h2>
+          <p style="font-size: 0.85rem; color: var(--muted);">OFFICIAL PAYMENT RECEIPT</p>
+        </div>
+
+        <div class="receipt-row">
+          <span>Receipt No:</span>
+          <strong id="recReceiptNo"></strong>
+        </div>
+        <div class="receipt-row">
+          <span>Date / Time:</span>
+          <span id="recDate"></span>
+        </div>
+        <div class="receipt-row">
+          <span>Student Name:</span>
+          <strong id="recStudent"></strong>
+        </div>
+        <div class="receipt-row">
+          <span>Student ID:</span>
+          <span id="recCode"></span>
+        </div>
+        <div class="receipt-row">
+          <span>Course:</span>
+          <span id="recCourse"></span>
+        </div>
+        <div class="receipt-row">
+          <span>Fee Description:</span>
+          <span id="recFeeTitle"></span>
+        </div>
+        <div class="receipt-row">
+          <span>Payment Method:</span>
+          <span id="recMethod"></span>
+        </div>
+        <div class="receipt-row" style="margin-top: 0.5rem; font-size: 1.1rem; border-top: 1px solid #0f172a; padding-top: 0.5rem;">
+          <strong>Amount Paid:</strong>
+          <strong id="recAmount" style="color: var(--success); font-size: 1.2rem;"></strong>
+        </div>
+        <div class="receipt-row">
+          <span>Remaining Fee Balance:</span>
+          <span id="recRemaining"></span>
+        </div>
+        <div id="recNotesRow" class="receipt-row hidden">
+          <span>Notes:</span>
+          <span id="recNotes"></span>
+        </div>
+
+        <div style="text-align: center; margin-top: 1.5rem; font-size: 0.8rem; color: var(--muted);">
+          Thank you for your payment. Keep this receipt for your records.
+        </div>
+      </div>
+
+      <div class="no-print" style="display: flex; justify-content: flex-end; gap: 0.5rem; margin-top: 1rem;">
+        <button type="button" class="btn btn-outline closeModalBtn">Close</button>
+        <button type="button" id="printReceiptBtn" class="btn">Print Receipt</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+</body>
+</html>

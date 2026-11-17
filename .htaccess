@@ -1,0 +1,5 @@
+# Prevent directory browsing and direct access to non-public files
+Options -Indexes
+<FilesMatch "^\.">
+    Require all denied
+</FilesMatch>
